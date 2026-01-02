@@ -14,7 +14,7 @@
         <AssemblyName>Soenneker.Utils.CronExpressions</AssemblyName>
         <PackageId>Soenneker.Utils.CronExpressions</PackageId>
         <PackageTags>utils cronexpressions cron time expressions constants cronexpressionsutil util csharp dotnet c# .net</PackageTags>
-        <Copyright>Copyright © 2025 Jake Soenneker</Copyright>
+        <Copyright>Copyright © 2025-2026 Jake Soenneker</Copyright>
         <Authors>Jake Soenneker</Authors>
         <Company>https://soenneker.com</Company>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
