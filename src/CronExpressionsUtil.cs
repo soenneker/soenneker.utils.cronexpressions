@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Soenneker.Enums.DayOfWeek;
+using Soenneker.Utils.PooledStringBuilders;
+using System;
 using System.Diagnostics.Contracts;
-using Soenneker.Enums.DayOfWeek;
-using Soenneker.Extensions.String;
+using System.Runtime.CompilerServices;
 
 namespace Soenneker.Utils.CronExpressions;
 
@@ -17,11 +18,17 @@ public static class CronExpressionUtil
     /// <returns>A CRON expression string.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="interval"/> is less than 1 or greater than 59.</exception>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string EveryXMinutes(int interval)
     {
-        if (interval is <= 0 or > 59)
+        if ((uint)(interval - 1) > 58u)
             throw new ArgumentOutOfRangeException(nameof(interval));
-        return $"*/{interval} * * * *";
+
+        using var psb = new PooledStringBuilder();
+        psb.Append("*/");
+        psb.Append(interval);
+        psb.Append(" * * * *");
+        return psb.ToString();
     }
 
     /// <summary>
@@ -32,12 +39,21 @@ public static class CronExpressionUtil
     /// <returns>A CRON expression string.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="interval"/> is less than 1 or greater than 23.</exception>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string EveryXHours(int interval, int minute = 0)
     {
-        if (interval is <= 0 or > 23)
+        if ((uint)(interval - 1) > 22u)
             throw new ArgumentOutOfRangeException(nameof(interval));
 
-        return $"{minute} */{interval} * * *";
+        if ((uint)minute > 59u)
+            throw new ArgumentOutOfRangeException(nameof(minute));
+
+        using var psb = new PooledStringBuilder();
+        psb.Append(minute);
+        psb.Append(" */");
+        psb.Append(interval);
+        psb.Append(" * * *");
+        return psb.ToString();
     }
 
     /// <summary>
@@ -47,7 +63,12 @@ public static class CronExpressionUtil
     /// <param name="minute">The minute of the hour (default is 0).</param>
     /// <returns>A CRON expression string.</returns>
     [Pure]
-    public static string DailyAt(int hour, int minute = 0) => Format(minute, hour, "*", "*", "*");
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string DailyAt(int hour, int minute = 0)
+    {
+        ValidateHourMinute(hour, minute);
+        return Format(minute, hour, "*", "*", "*");
+    }
 
     /// <summary>
     /// Creates a CRON expression that triggers weekly on a specific day at a given time.
@@ -57,8 +78,12 @@ public static class CronExpressionUtil
     /// <param name="minute">The minute of the hour (default is 0).</param>
     /// <returns>A CRON expression string.</returns>
     [Pure]
-    public static string WeeklyAt(DayOfWeekType day, int hour = 0, int minute = 0) =>
-        Format(minute, hour, "*", "*", ToCronDay(day));
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string WeeklyAt(DayOfWeekType day, int hour = 0, int minute = 0)
+    {
+        ValidateHourMinute(hour, minute);
+        return Format(minute, hour, "*", "*", ToCronDay(day));
+    }
 
     /// <summary>
     /// Creates a CRON expression that triggers monthly on a specific day at a given time.
@@ -69,12 +94,20 @@ public static class CronExpressionUtil
     /// <returns>A CRON expression string.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="dayOfMonth"/> is less than 1 or greater than 31.</exception>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string MonthlyAt(int dayOfMonth, int hour = 0, int minute = 0)
     {
-        if (dayOfMonth is < 1 or > 31)
+        if ((uint)(dayOfMonth - 1) > 30u)
             throw new ArgumentOutOfRangeException(nameof(dayOfMonth));
 
-        return Format(minute, hour, dayOfMonth.ToString(), "*", "*");
+        ValidateHourMinute(hour, minute);
+
+        using var psb = new PooledStringBuilder();
+        AppendMinuteHour(psb, minute, hour);
+        psb.Append(' ');
+        psb.Append(dayOfMonth);
+        psb.Append(" * *");
+        return psb.ToString();
     }
 
     /// <summary>
@@ -84,8 +117,12 @@ public static class CronExpressionUtil
     /// <param name="minute">The minute of the hour (default is 0).</param>
     /// <returns>A CRON expression string.</returns>
     [Pure]
-    public static string WeekdaysAt(int hour, int minute = 0) =>
-        Format(minute, hour, "*", "*", "MON-FRI");
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string WeekdaysAt(int hour, int minute = 0)
+    {
+        ValidateHourMinute(hour, minute);
+        return Format(minute, hour, "*", "*", "MON-FRI");
+    }
 
     /// <summary>
     /// Creates a CRON expression that triggers on weekends (Saturday and Sunday) at a given time.
@@ -94,8 +131,12 @@ public static class CronExpressionUtil
     /// <param name="minute">The minute of the hour (default is 0).</param>
     /// <returns>A CRON expression string.</returns>
     [Pure]
-    public static string WeekendsAt(int hour, int minute = 0) =>
-        Format(minute, hour, "*", "*", "SAT,SUN");
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string WeekendsAt(int hour, int minute = 0)
+    {
+        ValidateHourMinute(hour, minute);
+        return Format(minute, hour, "*", "*", "SAT,SUN");
+    }
 
     /// <summary>
     /// Formats a CRON expression string from the given parts.
@@ -107,15 +148,62 @@ public static class CronExpressionUtil
     /// <param name="dow">Day of week field.</param>
     /// <returns>A full CRON expression string.</returns>
     [Pure]
-    public static string Format(int minute, int hour, string dom, string month, string dow) =>
-        $"{minute} {hour} {dom} {month} {dow}";
+    public static string Format(int minute, int hour, string dom, string month, string dow)
+    {
+        using var psb = new PooledStringBuilder();
+
+        AppendMinuteHour(psb, minute, hour);
+        psb.Append(' ');
+        psb.Append(dom);
+        psb.Append(' ');
+        psb.Append(month);
+        psb.Append(' ');
+        psb.Append(dow);
+
+        return psb.ToString();
+    }
 
     /// <summary>
     /// Converts a <see cref="DayOfWeekType"/> to a CRON-compatible three-letter day abbreviation (e.g., "MON", "TUE").
     /// </summary>
-    /// <param name="day">The day of the week.</param>
-    /// <returns>A three-letter uppercase string representing the day of week.</returns>
     [Pure]
-    public static string ToCronDay(DayOfWeekType day) =>
-        day.ToString().ToUpperInvariantFast()[..3];
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string ToCronDay(DayOfWeekType day)
+    {
+        // Intellenum instances are singletons here, so ReferenceEquals is ideal.
+        if (ReferenceEquals(day, DayOfWeekType.Monday))
+            return "MON";
+        if (ReferenceEquals(day, DayOfWeekType.Tuesday))
+            return "TUE";
+        if (ReferenceEquals(day, DayOfWeekType.Wednesday))
+            return "WED";
+        if (ReferenceEquals(day, DayOfWeekType.Thursday))
+            return "THU";
+        if (ReferenceEquals(day, DayOfWeekType.Friday))
+            return "FRI";
+        if (ReferenceEquals(day, DayOfWeekType.Saturday))
+            return "SAT";
+        if (ReferenceEquals(day, DayOfWeekType.Sunday))
+            return "SUN";
+
+        throw new ArgumentOutOfRangeException(nameof(day));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void ValidateHourMinute(int hour, int minute)
+    {
+        if ((uint)hour > 23u)
+            throw new ArgumentOutOfRangeException(nameof(hour));
+
+        if ((uint)minute > 59u)
+            throw new ArgumentOutOfRangeException(nameof(minute));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AppendMinuteHour(PooledStringBuilder psb, int minute, int hour)
+    {
+        psb.Append(minute);
+        psb.Append(' ');
+        psb.Append(hour);
+    }
 }
