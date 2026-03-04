@@ -21,8 +21,10 @@
         </Content>
     </ItemGroup>
 
-    <ItemGroup><PackageReference Include="Soenneker.Utils.Test" Version="4.0.304" />
-        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="4.0.2216" />
+    <ItemGroup>
+        <PackageReference Include="Soenneker.Enums.DayOfWeek" Version="4.0.712" />
+        <PackageReference Include="Soenneker.Utils.Test" Version="4.0.304" />
+        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="4.0.2217" />
         <PackageReference Include="xUnit.v3" Version="3.2.2" />
     </ItemGroup>
 
