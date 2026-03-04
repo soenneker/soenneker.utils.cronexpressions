@@ -1,4 +1,4 @@
-﻿using Soenneker.Enums.DayOfWeek;
+using Soenneker.Enums.DayOfWeek;
 using Soenneker.Utils.PooledStringBuilders;
 using System;
 using System.Diagnostics.Contracts;
@@ -170,7 +170,7 @@ public static class CronExpressionUtil
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToCronDay(DayOfWeekType day)
     {
-        // Intellenum instances are singletons here, so ReferenceEquals is ideal.
+        // EnumValue instances are singletons here, so ReferenceEquals is ideal.
         if (ReferenceEquals(day, DayOfWeekType.Monday))
             return "MON";
         if (ReferenceEquals(day, DayOfWeekType.Tuesday))
