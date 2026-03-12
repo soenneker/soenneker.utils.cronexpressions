@@ -29,7 +29,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Soenneker.Utils.CronExpressions.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Utils.CronExpressions\Soenneker.Utils.CronExpressions.csproj" />
     </ItemGroup>
 
     <ItemGroup>
