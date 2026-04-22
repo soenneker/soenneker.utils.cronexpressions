@@ -1,18 +1,17 @@
 using System;
 using Soenneker.Enums.DayOfWeek;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Utils.CronExpressions.Tests;
 
-[Collection("Collection")]
-public class CronExpressionsUtilTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public class CronExpressionsUtilTests : HostedUnitTest
 {
-    public CronExpressionsUtilTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public CronExpressionsUtilTests(Host host) : base(host)
     {
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
@@ -37,7 +36,7 @@ public class CronExpressionsUtilTests : FixturedUnitTest
         Assert.Equal(expected, result);
     }
 
-    [Fact]
+    [Test]
     public void ToCronDay_invalid_throws_ArgumentOutOfRangeException()
     {
         var invalidDay = (DayOfWeekType)null!;
