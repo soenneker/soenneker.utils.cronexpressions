@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using AwesomeAssertions;
 using Soenneker.Enums.DayOfWeek;
 using Soenneker.Tests.HostedUnit;
 
@@ -17,23 +19,23 @@ public class CronExpressionsUtilTests : HostedUnitTest
 
     }
 
-    public static TheoryData<DayOfWeekType, string> ToCronDayCases => new()
+    public static IEnumerable<object[]> ToCronDayCases()
     {
-        { DayOfWeekType.Monday, "MON" },
-        { DayOfWeekType.Tuesday, "TUE" },
-        { DayOfWeekType.Wednesday, "WED" },
-        { DayOfWeekType.Thursday, "THU" },
-        { DayOfWeekType.Friday, "FRI" },
-        { DayOfWeekType.Saturday, "SAT" },
-        { DayOfWeekType.Sunday, "SUN" },
-    };
+        yield return [DayOfWeekType.Monday, "MON"];
+        yield return [DayOfWeekType.Tuesday, "TUE"];
+        yield return [DayOfWeekType.Wednesday, "WED"];
+        yield return [DayOfWeekType.Thursday, "THU"];
+        yield return [DayOfWeekType.Friday, "FRI"];
+        yield return [DayOfWeekType.Saturday, "SAT"];
+        yield return [DayOfWeekType.Sunday, "SUN"];
+    }
 
-    [Theory]
-    [MemberData(nameof(ToCronDayCases))]
+    [Test]
+    [MethodDataSource(nameof(ToCronDayCases))]
     public void ToCronDay_returns_expected_abbreviation(DayOfWeekType day, string expected)
     {
         string result = CronExpressionUtil.ToCronDay(day);
-        Assert.Equal(expected, result);
+        result.Should().Be(expected);
     }
 
     [Test]
@@ -41,6 +43,7 @@ public class CronExpressionsUtilTests : HostedUnitTest
     {
         var invalidDay = (DayOfWeekType)null!;
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() => CronExpressionUtil.ToCronDay(invalidDay));
-        Assert.Equal("day", ex.ParamName);
+        ex.ParamName.Should().Be("day");
     }
 }
+
