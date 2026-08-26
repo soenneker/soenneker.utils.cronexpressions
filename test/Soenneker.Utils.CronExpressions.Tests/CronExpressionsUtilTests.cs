@@ -16,7 +16,9 @@ public class CronExpressionsUtilTests : HostedUnitTest
     [Test]
     public void Default()
     {
-
+        CronExpressionUtil.DailyAt(9, 30).Should().Be("30 9 * * *");
+        CronExpressionUtil.MonthlyAt(15, 9, 30).Should().Be("30 9 15 * *");
+        CronExpressionUtil.WeeklyAt(DayOfWeekType.Monday, 9, 30).Should().Be("30 9 * * MON");
     }
 
     public static IEnumerable<object[]> ToCronDayCases()

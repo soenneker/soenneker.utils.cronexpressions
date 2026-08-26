@@ -103,7 +103,9 @@ public static class CronExpressionUtil
         ValidateHourMinute(hour, minute);
 
         using var psb = new PooledStringBuilder();
-        AppendMinuteHour(psb, minute, hour);
+        psb.Append(minute);
+        psb.Append(' ');
+        psb.Append(hour);
         psb.Append(' ');
         psb.Append(dayOfMonth);
         psb.Append(" * *");
@@ -152,7 +154,9 @@ public static class CronExpressionUtil
     {
         using var psb = new PooledStringBuilder();
 
-        AppendMinuteHour(psb, minute, hour);
+        psb.Append(minute);
+        psb.Append(' ');
+        psb.Append(hour);
         psb.Append(' ');
         psb.Append(dom);
         psb.Append(' ');
@@ -197,13 +201,5 @@ public static class CronExpressionUtil
 
         if ((uint)minute > 59u)
             throw new ArgumentOutOfRangeException(nameof(minute));
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AppendMinuteHour(PooledStringBuilder psb, int minute, int hour)
-    {
-        psb.Append(minute);
-        psb.Append(' ');
-        psb.Append(hour);
     }
 }
