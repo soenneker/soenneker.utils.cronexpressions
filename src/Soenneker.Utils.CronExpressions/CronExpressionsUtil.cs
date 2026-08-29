@@ -170,6 +170,7 @@ public static class CronExpressionUtil
     /// <summary>
     /// Converts a <see cref="DayOfWeekType"/> to a CRON-compatible three-letter day abbreviation (e.g., "MON", "TUE").
     /// </summary>
+    /// <returns>Converts a <see cref="DayOfWeekType"/> to a CRON-compatible three-letter day abbreviation (e.g., "MON", "TUE").</returns>
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToCronDay(DayOfWeekType day)
